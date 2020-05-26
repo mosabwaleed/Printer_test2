@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements PrintingCallback 
     }
 
     private void initprinter() {
-        if (!Printooth.INSTANCE.hasPairedPrinter()){
+        if (Printooth.INSTANCE.hasPairedPrinter()){
             printing = Printooth.INSTANCE.printer();
         }
         if(printing !=null){
