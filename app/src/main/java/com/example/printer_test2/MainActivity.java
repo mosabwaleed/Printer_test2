@@ -6,6 +6,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -23,6 +28,8 @@ import com.mazenrashed.printooth.data.printer.DefaultPrinter;
 import com.mazenrashed.printooth.ui.ScanningActivity;
 import com.mazenrashed.printooth.utilities.Printing;
 import com.mazenrashed.printooth.utilities.PrintingCallback;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -84,20 +91,45 @@ public class MainActivity extends AppCompatActivity implements PrintingCallback 
         imagelinear.setDrawingCacheEnabled(true);
         imagelinear.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-        imagelinear.layout(0, 0, imagelinear.getMeasuredWidth(), imagelinear.getMeasuredHeight());
+        imagelinear.layout(0, 0, imagelinear.getMeasuredWidth(), imagelinear.getMeasuredHeight()/2);
         imagelinear.buildDrawingCache(true);
         Bitmap b = Bitmap.createBitmap(imagelinear.getDrawingCache());
         imagelinear.setDrawingCacheEnabled(false);
         ArrayList<Printable> printables = new ArrayList<>();
-        printables.add(new ImagePrintable.Builder(b).build());
-        printing.print(printables);
+        Canvas canvas = new Canvas(b);
+        ColorMatrix ma = new ColorMatrix();
+        ma.setSaturation(0);
+        Paint paint = new Paint();
+        paint.setColorFilter(new ColorMatrixColorFilter(ma));
+        canvas.drawBitmap(b, 0, 0, paint);
+        Picasso.get().load("https://www.shareicon.net/data/2016/12/07/862690_media_512x512.png")
+                .into(new Target() {
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                        printables.add(new ImagePrintable.Builder(bitmap).build());
+                        printing.print(printables);
+                    }
+
+                    @Override
+                    public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+
+                    }
+
+                    @Override
+                    public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                    }
+                });
+        //printables.add(new ImagePrintable.Builder(b).build());
+        System.out.println(printables);
+        System.out.println(printing);
+        //printing.print(printables);
 //        ByteArrayOutputStream stream = new ByteArrayOutputStream();
 //        b.compress(Bitmap.CompressFormat.PNG, 100, stream);
 //        byte[] byteArray = stream.toByteArray();
 //        Intent intent = new Intent(MainActivity.this,View_Image.class);
 //        intent.putExtra("image",byteArray);
 //        startActivity(intent);
-
     }
 
     private void ChangePairAndUnpair() {
