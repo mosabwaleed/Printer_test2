@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements PrintingCallback 
                     else {
                         PrintText();
                     }
+                    //PrintText();
                 }
 
             }
@@ -91,41 +92,17 @@ public class MainActivity extends AppCompatActivity implements PrintingCallback 
         imagelinear.setDrawingCacheEnabled(true);
         imagelinear.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-        imagelinear.layout(0, 0, imagelinear.getMeasuredWidth(), imagelinear.getMeasuredHeight()/2);
+        imagelinear.layout(0, 0, imagelinear.getMeasuredWidth(), imagelinear.getMeasuredHeight());
         imagelinear.buildDrawingCache(true);
         Bitmap b = Bitmap.createBitmap(imagelinear.getDrawingCache());
         imagelinear.setDrawingCacheEnabled(false);
         ArrayList<Printable> printables = new ArrayList<>();
-        Canvas canvas = new Canvas(b);
-        ColorMatrix ma = new ColorMatrix();
-        ma.setSaturation(0);
-        Paint paint = new Paint();
-        paint.setColorFilter(new ColorMatrixColorFilter(ma));
-        canvas.drawBitmap(b, 0, 0, paint);
-        Picasso.get().load("https://www.shareicon.net/data/2016/12/07/862690_media_512x512.png")
-                .into(new Target() {
-                    @Override
-                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                        printables.add(new ImagePrintable.Builder(bitmap).build());
-                        printing.print(printables);
-                    }
-
-                    @Override
-                    public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-
-                    }
-
-                    @Override
-                    public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-                    }
-                });
-        //printables.add(new ImagePrintable.Builder(b).build());
+        printables.add(new ImagePrintable.Builder(toGrayscale(b)).setAlignment(DefaultPrinter.Companion.getALIGNMENT_CENTER()).build());
         System.out.println(printables);
         System.out.println(printing);
-        //printing.print(printables);
+        printing.print(printables);
 //        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//        b.compress(Bitmap.CompressFormat.PNG, 100, stream);
+//        toGrayscale(b).compress(Bitmap.CompressFormat.PNG, 30, stream);
 //        byte[] byteArray = stream.toByteArray();
 //        Intent intent = new Intent(MainActivity.this,View_Image.class);
 //        intent.putExtra("image",byteArray);
@@ -185,4 +162,19 @@ public class MainActivity extends AppCompatActivity implements PrintingCallback 
             printing.setPrintingCallback(this);
         }
     }
+    public static Bitmap toGrayscale(Bitmap srcImage) {
+
+        Bitmap bmpGrayscale = Bitmap.createBitmap(srcImage.getWidth(),
+                srcImage.getHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(bmpGrayscale);
+        Paint paint = new Paint();
+
+        ColorMatrix cm = new ColorMatrix();
+        cm.setSaturation(0);
+        paint.setColorFilter(new ColorMatrixColorFilter(cm));
+        canvas.drawBitmap(srcImage, 0, 0, paint);
+        return bmpGrayscale;
+    }
+
 }
